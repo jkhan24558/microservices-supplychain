@@ -1,0 +1,35 @@
+# this is a mockup file to illustrate API policy zones concepts 
+apiVersion: mockup/v1
+kind: APIPolicyDefinition
+metadata:
+  name: internal-api-policy
+spec:
+  rules:
+    
+    - name: internal-api-policy
+    
+      acceesControlRequired: CrossClusters
+    
+      basicAuthAllowed: InCluster
+    
+      oAuthv2Verification: IfUpdateOperation
+
+      apiEncryption: OffPlatformCallouts
+    
+      apiKeyVerification: CrossClusters
+    
+      jwtVerfication: Always
+    
+      trafficeManagementEnforced: OffPlatformCallouts
+    
+      globalNameSpacesEnable: CrossClusters
+    
+      openAPIValidation: Always
+    
+      apiModelRequired: IfUpdateOperation
+    
+      apiPathRequired: Always
+    
+      apiMethodRequired: Always
+    
+      apiCircuitBreakerRequired: IfUpdateOperation

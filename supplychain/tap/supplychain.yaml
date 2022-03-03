@@ -1,0 +1,158 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:yaml", "yaml")
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterSupplyChain
+metadata:
+  name: #@ data.values.artifactId
+spec:
+  selector:
+    app.tanzu.vmware.com/workload-type: #@ data.values.workloadType
+
+  resources:
+    - name: 1-APP-SOURCE
+      templateRef:
+        kind: ClusterSourceTemplate
+        name: source-template
+
+    - name: 1-APP-SOURCE-SCAN
+      templateRef:
+        kind: ClusterSourceTemplate
+        name: source-scanning-template
+      sources:
+        - resource: 1-app-source
+          name: source
+          
+    
+    - name: 2-APP-IMAGE
+      templateRef:
+        kind: ClusterImageTemplate
+        name: image-builder-template
+      sources:
+        - resource: 2-app-source-scan
+          name: scanned-source
+          
+          
+#@ if data.values.scanScope == "srcImg":    
+    - name: 2-APP-IMAGE-SCAN
+      templateRef:
+        kind: ClusterImageTemplate
+        name: image-scanning-template
+      images:
+        - component: 2-app-image
+          name: image
+          
+          
+#@ end
+
+    - name: 3-APP-CONFIG
+      templateRef:
+        kind: ClusterConfigTemplate
+        name: convention-template
+      images:
+      #@ if data.values.scanScope == "srcImg":
+        - component: 2-app-image-scan
+          name: scanned-image
+      #@ else:
+        - component: 2-app-image
+          name: image
+      #@ end     
+    
+    - name: 4-APP-DEPLOY
+      templateRef:
+        kind: ClusterTemplate
+        name: app-deploy-cnr-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+          
+      
+#@ if "rdsPostgres" in data.values.serviceBinding:
+    - name: 5-BIND-RDS-POSTGRESSQL
+      templateRef:
+        kind: ClusterTemplate
+        name: rds-postgres-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end    
+
+#@ if "azureSQL" in data.values.serviceBinding:
+    - name: 5-BIND-AZURE-SQL
+      templateRef:
+        kind: ClusterTemplate
+        name: azure-sql-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end
+
+#@ if "gcpSQL" in data.values.serviceBinding:
+    - name: 5-BIND-GCP-CLOUDSQL
+      templateRef:
+        kind: ClusterTemplate
+        name: gcp-cloudql-service-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end
+
+#@ if "k8sRabbitMQ" in data.values.serviceBinding:
+    - name: 5-BIND-K8S-RABBITMQ
+      templateRef:
+        kind: ClusterTemplate
+        name: k8s-rabbitmq-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end
+
+#@ if "k8sPostgresSQL" in data.values.serviceBinding:
+    - name: 5-BIND-K8S-POSTGRESSQL
+      templateRef:
+        kind: ClusterTemplate
+        name: k8s-postgres-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end   
+
+#@ if "vmPostgresSQL" in data.values.serviceBinding:
+    - name: 5-BIND-VM-POSTGRESSQL
+      templateRef:
+        kind: ClusterTemplate
+        name: vm-postgres-binder-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end    
+
+#@ if "core" in data.values.testScope:
+    - name: 6-TEST-CORE
+      templateRef:
+        kind: PipelineTemplate
+        name: core-testing-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end  
+
+#@ if "data" in data.values.testScope:
+    - name: 6-TEST-DATA
+      templateRef:
+        kind: PipelineTemplate
+        name: data-testing-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end  
+
+#@ if "api" in data.values.testScope:
+    - name: 6-TEST-API
+      templateRef:
+        kind: PipelineTemplate
+        name: api-testing-template
+      configs:
+        - resource: 3-app-config
+          name: app-config
+#@ end

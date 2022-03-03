@@ -1,0 +1,35 @@
+# this is a mockup file to illustrate API policy zones concepts 
+apiVersion: mockup/v1
+kind: APIPolicyDefinition
+metadata:
+  name: project-api-policy
+spec:
+  rules:
+    
+    - name: project-api-policy
+    
+      acceesControlRequired: Never
+    
+      basicAuthAllowed: Always
+    
+      oAuthv2Verification: Never
+
+      apiEncryption: Never
+    
+      apiKeyVerification: CrossClusters
+    
+      jwtVerfication: CrossClusters
+    
+      trafficeManagementEnforced: CrossClusters
+    
+      globalNameSpacesEnable: Never
+    
+      openAPIValidation: CrossClusters
+    
+      apiModelRequired: Always
+    
+      apiPathRequired: Always
+    
+      apiMethodRequired: Always
+    
+      apiCircuitBreakerRequired: CrossClusters

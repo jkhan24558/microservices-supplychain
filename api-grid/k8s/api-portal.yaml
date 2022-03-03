@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $(workload.metadata.name)$-api-portal
+spec:
+  template:
+    metadata:
+      labels:
+        app: $(workload.metadata.name)$-api-portal
+    spec:
+      containers:
+      - name: $(workload.metadata.name)$-api-portal
+        env:
+          - name: API_PORTAL_SOURCE_URLS
+            value: https://scg-openapi.example.com/openapi 

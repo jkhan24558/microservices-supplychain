@@ -1,0 +1,21 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: "tanzu.vmware.com/v1"
+kind: SpringCloudGatewayRouteConfig
+metadata:
+  name: $(workload.metadata.name)$-routes
+spec:
+  service: 
+    name: $(workload.metadata.name)$-service
+    predicates:
+      - Header=X-Request-Id
+#@ if data.values.gwSLA == "integration":
+    filters:
+      - RateLimit=2,60s
+#@ end
+#@ if data.values.gwSLA == "production":
+    ssoEnabled: true
+    filters:
+      - RateLimit=2,60s
+#@ end
+  routes: $(sources.source-code.routes)$
